@@ -1,6 +1,5 @@
-#[path = "../utils.rs"]
-mod utils;
 
+use aoc_2021::read_input as read_input;
 
 fn main() {
     println!("{}",problem_a("data/2020day1.txt"));
@@ -8,7 +7,7 @@ fn main() {
 }
 
 fn problem_a(file_name: &str) -> i64 {
-    let data = utils::read_file_to_int_array(file_name);
+    let data = read_input::read_file_to_int_array(file_name);
     match prod_sum(data,2020) {
         Some(x) => x,
         None => panic!("..."),
@@ -16,7 +15,7 @@ fn problem_a(file_name: &str) -> i64 {
 }
 
 fn problem_b(file_name: &str) -> i64 {
-    let data = utils::read_file_to_int_array(file_name);
+    let data = read_input::read_file_to_int_array(file_name);
     for (i,val) in data.iter().enumerate() {
         match prod_sum(data[..i].iter().chain(data[i+1..].iter()).map(|v| *v).collect(),2020-val) { 
             Some(x) => return x*val,
