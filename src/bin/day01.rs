@@ -2,8 +2,6 @@
 use aoc_2021::read_input as read_input;
 use std::collections::VecDeque;
 
-const HORIZON: usize = 3; // No variable length arrays...
-
 fn main() {
     println!("{}",problem_a("data/day01.txt"));
     println!("{}",problem_b("data/day01.txt"));
@@ -15,7 +13,7 @@ fn problem_a(file_name: &str) -> i64 {
 
 fn problem_b(file_name: &str) -> i64 {
     calc_larger(
-        &moving_average(&read_input::read_file_to_int_array(file_name))[2..].to_vec())
+        &moving_average(&read_input::read_file_to_int_array(file_name),3))
 }
 
 fn calc_larger(v: &Vec<i64>) -> i64 {
@@ -30,20 +28,17 @@ fn calc_larger(v: &Vec<i64>) -> i64 {
     ).1
 }
 
-fn moving_average(v: &Vec<i64>,) -> Vec<i64> {
-    let mut deq = VecDeque::from(vec![0;HORIZON-1]);
+fn moving_average(v: &Vec<i64>,h: usize) -> Vec<i64> {
+    let mut deq = VecDeque::from(vec![0;h-1]);
     let mut acc = 0;
-   // let mut res = 0;
     v.iter()
     .map(|x| {
         let res = *x + acc;
         deq.push_back(*x);
         acc = acc + *x - deq.pop_front().unwrap();
         res}
-    ).collect()
+    ).skip(h-1).collect()
 }
-
-
 
 #[cfg(test)]
 mod tests {
