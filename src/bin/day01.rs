@@ -8,12 +8,12 @@ fn main() {
 }
 
 fn problem_a(file_name: &str) -> i64 {
-    calc_larger(&read_input::read_file_to_int_array(file_name))    
+    calc_larger(&read_input::read_file_to_int_vec(file_name))    
 }
 
 fn problem_b(file_name: &str) -> i64 {
     calc_larger(
-        &moving_average(&read_input::read_file_to_int_array(file_name),3))
+        &moving_average(&read_input::read_file_to_int_vec(file_name),3))
 }
 
 fn calc_larger(v: &Vec<i64>) -> i64 {

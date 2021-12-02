@@ -8,7 +8,7 @@ fn main() {
 }
 
 fn problem_a(filename: &str) ->usize {
-    let data_vec = read_input::read_file_to_string_array(filename);
+    let data_vec = read_input::read_file_to_string_vec(filename);
     let re = Regex::new(r"^(\d+)-(\d+)+\s(\w):\s(\w+)$").unwrap();
     data_vec.iter().map(|line| re.captures(line).unwrap())
         .filter(|c| {
@@ -19,7 +19,7 @@ fn problem_a(filename: &str) ->usize {
 }
 
 fn problem_b(filename: &str) ->usize {
-    let data_vec = read_input::read_file_to_string_array(filename);
+    let data_vec = read_input::read_file_to_string_vec(filename);
     let re = Regex::new(r"^(\d+)-(\d+)+\s(\w):\s(\w+)$").unwrap();
     data_vec.iter().map(|line| re.captures(line).unwrap())
         .filter(|c| {
