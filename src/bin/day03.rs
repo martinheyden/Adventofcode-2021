@@ -15,11 +15,10 @@ fn problem_a(filename: &str) -> i64 {
             match ch {
                 '0' => count[nbr] = count[nbr] - 1,
                 '1' => count[nbr] = count[nbr] + 1,
-                _ => panic!("input should be zeros and ones"),
+                _ => panic!("input should be zeroes and ones"),
             }
         }
     }
-
     find_params(&count)
 }
 
@@ -50,9 +49,8 @@ fn problem_b(filename: &str) -> i64 {
 //one_logic describes if a number will be saved if the current bit is one for a given count.
 fn calc_parameter(data: &Vec<String>, one_logic: fn(i64) -> bool) -> i64 {
     let mut vec = data.iter().collect::<Vec<&String>>(); //Makes it Vec<&String>
-                                                         // Must be a better way to do the above
+                                                         // Must be a better way to do the above?...
     let nbr_of_bits = vec[0].chars().count();
-
     for i in 0..nbr_of_bits {
         let count = vec
             .iter()
@@ -61,20 +59,17 @@ fn calc_parameter(data: &Vec<String>, one_logic: fn(i64) -> bool) -> i64 {
                 '0' => count - 1,
                 _ => panic!(""),
             });
-        if vec.iter().count() > 1 {
-            //if more than one number left
-            vec = vec
-                .into_iter()
-                .filter(|line| {
-                    //into iter,  otherwise we get &&string
-                    match line.chars().nth(i).unwrap() {
-                        '1' => one_logic(count),
-                        '0' => !one_logic(count),
-                        _ => panic!(""),
-                    }
-                })
-                .collect();
-        }
+        vec = vec
+            .into_iter()//into iter,  otherwise we get &&string
+            .filter(|line| {
+                match line.chars().nth(i).unwrap() {
+                    '1' => one_logic(count),
+                    '0' => !one_logic(count),
+                    _ => panic!(""),
+                }
+            })
+            .collect();
+        if vec.iter().count() == 1  {break} ; //If only one number left
     }
     i64::from_str_radix(vec[0], 2).unwrap()
 }
