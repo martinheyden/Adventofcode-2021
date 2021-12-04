@@ -60,16 +60,16 @@ fn calc_parameter(data: &Vec<String>, one_logic: fn(i64) -> bool) -> i64 {
                 _ => panic!(""),
             });
         vec = vec
-            .into_iter()//into iter,  otherwise we get &&string
-            .filter(|line| {
-                match line.chars().nth(i).unwrap() {
-                    '1' => one_logic(count),
-                    '0' => !one_logic(count),
-                    _ => panic!(""),
-                }
+            .into_iter() //into iter,  otherwise we get &&string
+            .filter(|line| match line.chars().nth(i).unwrap() {
+                '1' => one_logic(count),
+                '0' => !one_logic(count),
+                _ => panic!(""),
             })
             .collect();
-        if vec.iter().count() == 1  {break} ; //If only one number left
+        if vec.iter().count() == 1 {
+            break;
+        }; //If only one number left
     }
     i64::from_str_radix(vec[0], 2).unwrap()
 }
