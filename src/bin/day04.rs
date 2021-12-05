@@ -198,6 +198,6 @@ mod tests {
 
     #[test]
     fn part2() {
-        assert_eq!(-1, problem_b("data/day04_test.txt"))
+        assert_eq!(1924, problem_b("data/day04_test.txt"))
     }
 }
