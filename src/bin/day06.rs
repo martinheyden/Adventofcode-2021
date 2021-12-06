@@ -2,35 +2,30 @@ use aoc_2021::read_input;
 
 const NBR_STATES: usize = 9;
 
+
+
 fn main() {
     println!("{}", problem_a("data/day06.txt"));
     println!("{}", problem_b("data/day06.txt"));
 }
 
 fn run_n_iters(file_name: &str, nbr_iter: i64) -> i64 {
-    let mut old = [0; NBR_STATES];
-    let mut new = [0; NBR_STATES];
+    let mut fishes = [0; NBR_STATES];
     let str = read_input::read_file_to_string(file_name);
     let nmbr_vec = str
         .split(",")
         .map(|x| x.parse::<usize>().unwrap())
         .collect::<Vec<usize>>();
-    //Initialize
     for i in nmbr_vec {
-        old[i] = old[i] + 1;
+        fishes[i] = fishes[i] + 1;
     }
-    for _day in 1..=nbr_iter {
-        for i in 1..=8 {
-            new[i - 1] = old[i];
-        }
-        new[6] = new[6] + old[0]; //Births
-        new[8] = old[0];
-        for i in 0..NBR_STATES {
-            old[i] = new[i];
-        }
+    let mut zero_index = 0;
+    for _ in 1..=nbr_iter {
+        fishes[(zero_index+7)%NBR_STATES] += fishes[zero_index]; //Should update +6 of the new zero index, which is +7 of the old.
+        zero_index = (zero_index + 1)%NBR_STATES;
     }
     //Count the total number of fishes
-    old.iter().fold(0, |acc, val| acc + val)
+    fishes.iter().fold(0, |acc, val| acc + val)
 }
 
 fn problem_a(file_name: &str) -> i64 {
