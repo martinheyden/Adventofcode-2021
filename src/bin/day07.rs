@@ -1,8 +1,22 @@
 use aoc_2021::read_input;
+use std::time;
 
 fn main() {
     println!("{}", problem_a("data/day07.txt"));
+    let now = time::Instant::now();
     println!("{}", problem_b("data/day07.txt"));
+
+    let now2 = time::Instant::now();
+    let ints = read_input::read_line_to_int_vec("data/day07.txt");
+    println! {"Bisection: {}", bisection(1,*ints.iter().max().unwrap(),&ints) }
+    println!(
+        "First method took  {} microseconds",
+        now.elapsed().as_micros()
+    );
+    println!(
+        "Bisection method took  {} microseconds",
+        now2.elapsed().as_micros()
+    );
 }
 
 //Mean is optimal height
@@ -27,6 +41,26 @@ fn problem_b(file_name: &str) -> i64 {
         }
     }
     panic!("no solution found") //Solution should be found by now.
+}
+
+fn bisection(left: i64, right: i64, depths: &Vec<i64>) -> i64 {
+    let middle = (left + right) / 2;
+    let cost_prev = depths
+        .iter()
+        .fold(0, |acc, el| acc + cost_crab(*el, middle - 1));
+    let cost = depths
+        .iter()
+        .fold(0, |acc, el| acc + cost_crab(*el, middle));
+    let cost_next = depths
+        .iter()
+        .fold(0, |acc, el| acc + cost_crab(*el, middle + 1));
+    if cost > cost_prev {
+        return bisection(left, middle, depths);
+    } else if cost > cost_next {
+        return bisection(middle, right, depths);
+    } else {
+        return cost;
+    }
 }
 
 fn cost_crab(val: i64, height: i64) -> i64 {
