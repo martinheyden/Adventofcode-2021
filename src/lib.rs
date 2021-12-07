@@ -16,6 +16,13 @@ pub mod read_input {
             .collect()
     }
 
+    pub fn read_line_to_int_vec(file_name: &str) -> Vec<i64> {
+        let str = read_file_to_string(file_name);
+        str.split(",")
+            .map(|x| x.parse::<i64>().unwrap())
+            .collect::<Vec<i64>>()
+    }
+
     pub fn read_file_to_string_vec(file_name: &str) -> Vec<String> {
         read_file_to_string(file_name)
             .split("\n")
