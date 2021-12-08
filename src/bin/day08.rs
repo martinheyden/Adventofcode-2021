@@ -12,6 +12,10 @@ const SEVEN: [usize; 3] = [0, 2, 5];
 const EIGHT: [usize; 7] = [0, 1, 2, 3, 4, 5, 6];
 const NINE: [usize; 6] = [0, 1, 2, 3, 5, 6];
 
+const MASKS: [&[usize]; 10] = [
+    &ZERO, &ONE, &TWO, &THREE, &FOUR, &FIVE, &SIX, &SEVEN, &EIGHT, &NINE,
+];
+
 fn main() {
     println!("{}", problem_a("data/day08.txt"));
     println!("{}", problem_b("data/day08.txt"));
@@ -36,7 +40,7 @@ fn problem_a(file_name: &str) -> i64 {
     count
 }
 
-fn problem_b(file_name: &str) -> i64 {
+fn problem_b(file_name: &str) -> usize {
     let str_vec = read_input::read_file_to_string_vec(file_name);
     let mut count = 0;
     let mut ans_map = vec![];
@@ -62,7 +66,7 @@ fn problem_b(file_name: &str) -> i64 {
     count
 }
 
-fn letter(ans_map: &Vec<char>, seg: &str) -> i64 {
+fn letter(ans_map: &Vec<char>, seg: &str) -> usize {
     let mut nbrs = vec![];
     for c in seg.chars() {
         for i in 0..7 {
@@ -72,29 +76,12 @@ fn letter(ans_map: &Vec<char>, seg: &str) -> i64 {
         }
     }
     nbrs.sort();
-    if compare(&ONE, &nbrs) {
-        return 1;
-    } else if compare(&TWO, &nbrs) {
-        return 2;
-    } else if compare(&THREE, &nbrs) {
-        return 3;
-    } else if compare(&FOUR, &nbrs) {
-        return 4;
-    } else if compare(&FIVE, &nbrs) {
-        return 5;
-    } else if compare(&SIX, &nbrs) {
-        return 6;
-    } else if compare(&SEVEN, &nbrs) {
-        return 7;
-    } else if compare(&EIGHT, &nbrs) {
-        return 8;
-    } else if compare(&NINE, &nbrs) {
-        return 9;
-    } else if compare(&ZERO, &nbrs) {
-        return 0;
-    } else {
-        panic!("could find number");
+    for i in 0..10 {
+        if compare(MASKS[i], &nbrs) {
+            return i;
+        }
     }
+    panic!("Could find number");
 }
 
 fn compare(arr: &[usize], v: &Vec<usize>) -> bool {
@@ -131,57 +118,33 @@ fn fits(candidate: &Vec<&char>, info: &Vec<&str>) -> bool {
 fn is_valid_digit(candidate: &Vec<&char>, nbr: &str) -> bool {
     let active_segments = get_active_segments(candidate, nbr);
     match active_segments.len() {
-        2 => {
-            return active_segments
-                .iter()
-                .enumerate()
-                .fold(true, |bol, e| ONE[e.0] == *e.1 && bol)
-        }
-        3 => {
-            return active_segments
-                .iter()
-                .enumerate()
-                .fold(true, |bol, e| SEVEN[e.0] == *e.1 && bol)
-        }
-        4 => {
-            return active_segments
-                .iter()
-                .enumerate()
-                .fold(true, |bol, e| FOUR[e.0] == *e.1 && bol)
-        }
+        2 => return check_match(&active_segments, &ONE),
+        3 => return check_match(&active_segments, &SEVEN),
+        4 => return check_match(&active_segments, &FOUR),
         5 => {
-            return active_segments
-                .iter()
-                .enumerate()
-                .fold(true, |bol, e| TWO[e.0] == *e.1 && bol)
-                || active_segments
-                    .iter()
-                    .enumerate()
-                    .fold(true, |bol, e| THREE[e.0] == *e.1 && bol)
-                || active_segments
-                    .iter()
-                    .enumerate()
-                    .fold(true, |bol, e| FIVE[e.0] == *e.1 && bol)
+            return check_match(&active_segments, &TWO)
+                || check_match(&active_segments, &THREE)
+                || check_match(&active_segments, &FIVE)
         }
         6 => {
-            return active_segments
-                .iter()
-                .enumerate()
-                .fold(true, |bol, e| ZERO[e.0] == *e.1 && bol)
-                || active_segments
-                    .iter()
-                    .enumerate()
-                    .fold(true, |bol, e| SIX[e.0] == *e.1 && bol)
-                || active_segments
-                    .iter()
-                    .enumerate()
-                    .fold(true, |bol, e| NINE[e.0] == *e.1 && bol)
+            return check_match(&active_segments, &ZERO)
+                || check_match(&active_segments, &SIX)
+                || check_match(&active_segments, &NINE)
         }
-        7 => return true,
+        7 => return true, //corresponds to eight
         _ => panic!("Weird length"),
     }
 }
 
+//Check if the active segments matches the mask
+fn check_match(active_segments: &Vec<usize>, mask: &[usize]) -> bool {
+    active_segments
+        .iter()
+        .enumerate()
+        .fold(true, |bol, e| mask[e.0] == *e.1 && bol)
+}
+
+//Gets the active segments (0 through 6) for nbr based on the candidate map
 fn get_active_segments(candidate: &Vec<&char>, nbr: &str) -> Vec<usize> {
     let mut v = Vec::new();
     for i in nbr.chars() {
