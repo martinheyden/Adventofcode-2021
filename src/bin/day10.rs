@@ -25,7 +25,7 @@ fn score(ch: char) -> i64 {
     }
 }
 
-fn score_b(ch: char) -> i128 {
+fn score_b(ch: char) -> i64 {
     match ch {
         ')' => 1,
         ']' => 2,
@@ -47,11 +47,11 @@ fn switch(ch: char) -> char {
 
 enum Result {
     Invalid(i64),
-    Incomplete(Vec<char>),
+    Incomplete,
 }
 
-fn parse_line(line: &str) -> Result {
-    let mut queue = Vec::new();
+fn parse_line(line: &str, queue: &mut Vec<char>) -> Result {
+    queue.clear();
     for ch in line.chars() {
         if opening(ch) {
             queue.push(ch);
@@ -62,14 +62,15 @@ fn parse_line(line: &str) -> Result {
             }
         }
     }
-    Result::Incomplete(queue)
+    Result::Incomplete
 }
 
 fn problem_a(file_name: &str) -> i64 {
     let str_vec = read_input::read_file_to_string_vec(file_name);
     let mut count = 0;
+    let mut queue = Vec::new();
     for string in str_vec {
-        match parse_line(&string) {
+        match parse_line(&string, &mut queue) {
             Result::Invalid(i) => count += i,
             _ => (),
         };
@@ -77,13 +78,14 @@ fn problem_a(file_name: &str) -> i64 {
     count
 }
 
-fn problem_b(file_name: &str) -> i128 {
+fn problem_b(file_name: &str) -> i64 {
     let str_vec = read_input::read_file_to_string_vec(file_name);
     let mut score_vec = Vec::new();
+    let mut queue = Vec::new();
     for string in str_vec {
-        match parse_line(&string) {
+        match parse_line(&string, &mut queue) {
             Result::Invalid(_) => (),
-            Result::Incomplete(queue) => {
+            Result::Incomplete => {
                 let mut score = 0;
                 for ch in queue.iter().rev() {
                     score = score * 5 + score_b(switch(*ch));
