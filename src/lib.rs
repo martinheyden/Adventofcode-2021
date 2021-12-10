@@ -29,4 +29,18 @@ pub mod read_input {
             .map(|i| i.to_string())
             .collect()
     }
+
+    pub fn read_file_to_matrix_compact(file_name: &str) -> Vec<Vec<i64>> {
+        let str_vec = read_file_to_string_vec(file_name);
+        let y_len = str_vec.len();
+        let mut data: Vec<Vec<i64>> = Vec::new();
+        for y in 0..y_len {
+            let data_vec = str_vec[y]
+                .chars()
+                .map(|i| i.to_digit(10).unwrap() as i64)
+                .collect::<Vec<i64>>();
+            data.push(data_vec);
+        }
+        data
+    }
 }
