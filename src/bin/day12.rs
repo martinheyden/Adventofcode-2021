@@ -61,39 +61,77 @@ impl CaveNetwork {
     }
 }
 
+struct GraphData {
+    visited: Vec<bool>,
+    double_done: bool,
+    look_up: HashMap<String,usize>,
+}
+
+impl GraphData {
+    fn new(n:usize,double_done:bool,start:usize) ->GraphData {
+        let mut data = GraphData {
+            visited: vec![false; n],
+            look_up : HashMap::new(),
+            double_done: double_done,
+        };
+        data.visited[start] = true;
+        data
+    }
+}
+
 fn problem_a(file_name: &str) -> usize {
     let data = read_input::read_file_to_string_vec(file_name);
     let cn = CaveNetwork::new(&data);
-    let mut visited = vec![false; cn.neighbour_vec.len()];
-    visited[cn.start_node] = true;
-    count_paths(cn.start_node, &cn, visited, true)
+    let mut gdata =  GraphData::new(cn.nbr_nodes,true,cn.start_node);
+    count_paths(cn.start_node, &cn, &mut gdata)
 }
 
 fn problem_b(file_name: &str) -> usize {
     let data = read_input::read_file_to_string_vec(file_name);
     let cn = CaveNetwork::new(&data);
-    let mut visited = vec![false; cn.neighbour_vec.len()];
-    visited[cn.start_node] = true;
-    count_paths(cn.start_node, &cn, visited, false)
+    let mut data =  GraphData::new(cn.nbr_nodes,false,cn.start_node);
+    count_paths(cn.start_node, &cn, &mut data)
 }
 
-fn count_paths(from: usize, cn: &CaveNetwork, mut visited: Vec<bool>, double_done: bool) -> usize {
+fn count_paths(from: usize, cn: &CaveNetwork, data: &mut GraphData) -> usize {
     if from == cn.end_node {
         return 1;
+    }else if data.look_up.contains_key(&hash(from,&data.visited,data.double_done)) {
+            return *data.look_up.get(&hash(from,&data.visited,data.double_done)).unwrap();
     } else {
-        if !cn.big_cave_vec[from] {
-            visited[from] = true; //If not big, set as visited
-        }
         let mut count = 0;
         for dest in cn.neighbour_vec[from].iter() {
-            if !visited[*dest] {
-                count += count_paths(*dest, cn, visited.clone(), double_done);
-            } else if !double_done && *dest != cn.start_node {
-                count += count_paths(*dest, cn, visited.clone(), true);
+            if !data.visited[*dest] {
+                if !cn.big_cave_vec[*dest] {
+                    data.visited[*dest] = true; //If not big, set as visited
+                }
+                count += count_paths(*dest, cn, data);
+                data.visited[*dest] = false;
+            } else if !data.double_done && *dest != cn.start_node {
+                data.double_done = true;
+                count += count_paths(*dest, cn, data);
+                data.double_done = false;
             }
         }
-        return count; //Todo, possible to make tail recursive?
+        data.look_up.insert(hash(from,&data.visited,data.double_done),count);
+        return count; 
     }
+}
+
+fn hash(node: usize, visited: &Vec<bool>, double_done:bool) -> String {
+    let mut s = String::new();
+    s.push_str(&node.to_string());
+    for val in visited.iter(){
+        if *val {
+            s.push('t');
+        }else {
+            s.push('f');
+        }
+    }
+    if double_done {
+        s.push('t');
+    }
+    s
 }
 
 #[cfg(test)]
