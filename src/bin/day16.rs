@@ -1,6 +1,6 @@
 use aoc_2021::read_input;
 
-
+//Pushes string slice to Vector of chars
 fn push_str(substr: &str,vec: &mut Vec<char>) {
     for ch in substr.chars() {
         vec.push(ch);
@@ -45,59 +45,6 @@ fn binary_to_dec(vec: &[char]) -> usize {
     val
 }
 
-fn parse_package(vec: &[char]) -> (usize,usize) {
-    
-    let mut vs = binary_to_dec(&vec[0..3]); //Read three bits version number
-    println!("reading package {:?} with version {}", to_string(vec), vs);
-    let pack_type = binary_to_dec(&vec[3..6]); //Read three bits package type
-    let mut ind = 6; //Start at index 6
-    match pack_type {
-        //literal package
-        4 => {
-            println!("Starting to read literal");
-            let mut go_on = true;
-            while go_on && ind<vec.len() {
-                //Check if last chunk
-                if vec[ind] == '0' {
-                    go_on = false;
-                }
-                ind = ind + 5; //Read next 5 chunk
-            }
-            if ind %4 !=0 {
-                //ind = ind + 4-ind%4;
-            } 
-            println!("read literal {:?}", to_string(&vec[0..ind]));
-        },
-        //Operator package
-        _ => {          
-            //Number of bits in subpackage(s) known  
-            if vec[ind] =='0' {
-                let len_subpackets = binary_to_dec(&vec[ind+1..ind+1+15]);
-                println!{"Operator length type 0 with supbackets of len {} ", len_subpackets};
-                let mut ind_sum =0;
-                ind = ind+16; //one bit for package type, 15 for length of subpackets
-                while ind_sum < len_subpackets && !only_zeros(&vec[ind+ind_sum..]){
-                    let r = parse_package(&vec[ind+ind_sum..]);
-                    vs += r.0;
-                    ind_sum+=r.1;
-                }
-                ind = ind + len_subpackets;
-            //Number of 11 bits subpackages are known
-            } else {
-                let number_subpackets = binary_to_dec(&vec[ind+1..ind+1+11]); //11 bits -> number subpackets
-                println!{"Operator length type 1 with {} subpackets", number_subpackets};
-                ind = ind + 1 + 11; //type + 11 bits for number of packets
-                for i in 0..number_subpackets {
-                    let r = parse_package(&vec[ind..]); 
-                    vs += r.0;
-                    ind += r.1;
-                }
-            }
-        }
-    }
-    (vs,ind)
-}
-
 fn only_zeros(vec: &[char]) -> bool {
     for ch in vec {
         if *ch == '1'{
@@ -109,12 +56,12 @@ fn only_zeros(vec: &[char]) -> bool {
 
 fn version_sum(hexa: &str) -> usize{
     let char_vec = hexa_to_binary(hexa);
-    parse_package(&char_vec[..]).0
+    parse_package(&char_vec[..]).2
 }
 
 fn parse_val(hexa: &str) -> usize{
     let char_vec = hexa_to_binary(hexa);
-    parse_package_2(&char_vec[..]).0
+    parse_package(&char_vec[..]).0
 }
 
 fn problem_a(file_name: &str) ->usize {
@@ -128,7 +75,8 @@ fn problem_b(file_name: &str) ->usize {
 
 }
 
-fn parse_package_2(vec: &[char]) -> (usize,usize) {
+fn parse_package(vec: &[char]) -> (usize,usize,usize) {
+    let mut vs = binary_to_dec(&vec[0..3]); //Read three bits version number
     let pack_type = binary_to_dec(&vec[3..6]); //Read three bits package type
     let mut ind = 6; //Start at index 
     let mut val = 0;
@@ -140,7 +88,7 @@ fn parse_package_2(vec: &[char]) -> (usize,usize) {
                 if vec[ind] == '0' {
                     go_on = false;
                 }
-                val = val *2*2*2*2 + binary_to_dec(&vec[ind+1..ind+5]);
+                val = val *16 + binary_to_dec(&vec[ind+1..ind+5]);
                 ind = ind + 5; //Read next 5 chunk
             }
         },
@@ -162,12 +110,13 @@ fn parse_package_2(vec: &[char]) -> (usize,usize) {
                 let mut ind_sum =0;
                 ind = ind+16; //one bit for package type, 15 for length of subpackets
                 while ind_sum < len_subpackets && !only_zeros(&vec[ind+ind_sum..]){
-                    let r = parse_package_2(&vec[ind+ind_sum..]);
+                    let r = parse_package(&vec[ind+ind_sum..]);
                     if ind_sum == 0 {
                         val = r.0;
                     } else {
                         val = f(val,r.0);
                     }
+                    vs += r.2;
                     ind_sum+=r.1;
                 }
                 ind = ind + len_subpackets;
@@ -176,18 +125,19 @@ fn parse_package_2(vec: &[char]) -> (usize,usize) {
                 let number_subpackets = binary_to_dec(&vec[ind+1..ind+1+11]); //11 bits -> number subpackets
                 ind = ind + 1 + 11; //type + 11 bits for number of packets
                 for i in 0..number_subpackets {
-                    let r = parse_package_2(&vec[ind..]); 
+                    let r = parse_package(&vec[ind..]); 
                     if i == 0 {
                         val = r.0;
                     } else {
                         val = f(val,r.0);
                     }
+                    vs += r.2;
                     ind += r.1;
                 }
             }
         }
     }
-    (val,ind)
+    (val,ind,vs)
 }
 
 fn main() {
@@ -195,12 +145,7 @@ fn main() {
     println!("{}", problem_b("data/day16.txt"));
 }
 
-fn to_string(v: &[char]) -> String {
-    v.iter().fold(String::new(), |mut acc, el| {
-        acc.push(*el);
-        acc
-    })
-}
+
 
 #[cfg(test)]
 mod tests {
@@ -209,7 +154,7 @@ mod tests {
 
     #[test]
     fn version_id() {
-        assert_eq!(6, parse_package(&hexa_to_binary("D2FE28")).0)
+        assert_eq!(6, parse_package(&hexa_to_binary("D2FE28")).2)
     }
 
     #[test]
